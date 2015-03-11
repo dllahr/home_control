@@ -1,0 +1,40 @@
+local delayBetweenReadings = 1;
+local numReadingsBetweenSends = 60;
+local deviceId = 1;
+
+server.log("Hello from the device!")
+
+// initialize pins
+local tmp36 = hardware.pin9;
+tmp36.configure(ANALOG_IN);
+
+local hardwareVoltages = array(numReadingsBetweenSends);
+local reads = array(numReadingsBetweenSends);
+local times = array(numReadingsBetweenSends);
+
+function takeReadings() {
+    for (local i = 0; i < numReadingsBetweenSends; i++) {
+        local hw = hardware.voltage();
+        local r = tmp36.read();
+        local t = time()
+        
+        hardwareVoltages[i] = hw;
+        reads[i] = r;
+        times[i] = t;
+        
+        imp.sleep(delayBetweenReadings)
+    }
+    
+    local sensor_data = {
+        device_id = deviceId,
+        hardware_voltages = hardwareVoltages,
+        tmp36_reads = reads,
+        read_times = times
+    }
+    
+    agent.send("sensor_data", sensor_data)
+
+    imp.wakeup(0, takeReadings);
+}
+
+takeReadings();
