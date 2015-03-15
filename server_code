@@ -17,14 +17,12 @@ function calcStats(data) {
 }
 
 device.on("sensor_data", function(sensor_data) {
-    //server.log(sensor_data.hardware_voltages[0]);
-    //server.log(sensor_data.hardware_voltages.len());
-    //server.log(sensor_data.tmp36_reads[0]);
-    //server.log(sensor_data.read_times[0]);
-    local hwStats = calcStats(sensor_data.hardware_voltages)
-    local readStats = calcStats(sensor_data.tmp36_reads)
-    server.log(format("hwStats ave: %f  sdev: %f", hwStats.ave, hwStats.sdev))
-    server.log(format("readStats ave: %f  sdev: %f", readStats.ave, readStats.sdev))
+    local hwStats = calcStats(sensor_data.hardware_voltages);
+    local readStats = calcStats(sensor_data.tmp36_reads);
+    local lightStats = calcStats(sensor_data.light_levels);
+    server.log(format("hwStats ave: %f  sdev: %f", hwStats.ave, hwStats.sdev));
+    server.log(format("readStats ave: %f  sdev: %f", readStats.ave, readStats.sdev));
+    server.log(format("lightStats ave: %f  sdev: %f", lightStats.ave, lightStats.sdev));
     
     local payload = {
         data = http.jsonencode(sensor_data)
@@ -39,3 +37,4 @@ device.on("sensor_data", function(sensor_data) {
     local response = request.sendsync();
     server.log("data received from device, sent to server");
 });
+
