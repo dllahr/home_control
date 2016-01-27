@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <div id="myDiv" style="width: 1024px; height: 768px;"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <script>
+	$.ajax({url:"homeControl/", success: function(result) {
+//		$("#anotherDiv").html(JSON.stringify(result));
+		var deviceMap = {};
+		for (var i = 0; i < result.length; i++) {
+			var r = result[i];
+			var deviceId = r["device_id"];
+			
+			if (!(deviceId in deviceMap)) {
+				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter"};
+			}
+
+			var deviceData = deviceMap[deviceId];
+			var myDate = new Date(r["time"]*1000);
+//			console.log(myDate);
+			deviceData["x"].push(myDate);
+//			deviceData["x"].push(r["time"]);
+			deviceData["y"].push(r["value"]);
+//			console.log(JSON.stringify(deviceData));
+		}
+//		console.log(JSON.stringify(deviceMap));
+
+		var data = [];
+		for (var deviceId in deviceMap) {
+			data.push(deviceMap[deviceId]);
+		}
+//		console.log(JSON.stringify(data));
+		Plotly.newPlot("myDiv", data);
+	}});
+    </script>
+    </body>
+</html>
