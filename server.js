@@ -15,7 +15,7 @@ http.createServer(function (request, response) {
 //		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.writeHead(200, {"Content-Type":"application/json"});
 
-		db.all("select device_id, time, value from measurements where time > (select max(time)-200 from measurements) and measurement_type_id=1", function(err, rows) {
+		db.all("select device_id, time, value from measurements where time > (select max(time)-7200 from measurements) and measurement_type_id=1", function(err, rows) {
 			if (err) {
 				my_err_handler(err);
 			} else {
