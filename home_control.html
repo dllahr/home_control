@@ -7,8 +7,12 @@
     <body>
         <div id="myDiv" style="width: 1024px; height: 768px;"><!-- Plotly chart will be drawn inside this DIV --></div>
     <script>
+	$("#myDiv").html("loading data (10-15 s)");
+	$("body").css("cursor", "progress");
+
 	$.ajax({url:"homeControl/", success: function(result) {
-//		$("#anotherDiv").html(JSON.stringify(result));
+		$("#myDiv").html("data retrieved, formatting");
+
 		var deviceMap = {};
 		for (var i = 0; i < result.length; i++) {
 			var r = result[i];
@@ -20,21 +24,20 @@
 
 			var deviceData = deviceMap[deviceId];
 			var myDate = new Date(r["time"]*1000);
-//			console.log(myDate);
 			deviceData["x"].push(myDate);
-//			deviceData["x"].push(r["time"]);
 			deviceData["y"].push(r["value"]);
-//			console.log(JSON.stringify(deviceData));
 		}
-//		console.log(JSON.stringify(deviceMap));
 
 		var data = [];
 		for (var deviceId in deviceMap) {
 			data.push(deviceMap[deviceId]);
 		}
-//		console.log(JSON.stringify(data));
+
+		$("#myDiv").html("");
+		$("body").css("cursor", "default");
 		Plotly.newPlot("myDiv", data);
-	}});
+	}
+	});
     </script>
     </body>
 </html>

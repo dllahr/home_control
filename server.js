@@ -3,6 +3,14 @@ var sqlite3 = require('sqlite3').verbose();
 
 var db = new sqlite3.Database('/media/raid/dllahr/projects/temperatureMonitoring/measurements.sqlite3');
 
+//This query returns the temperature data (measurement_type_id=1) for 
+//the most recently recorded week (1 week = 604800 s, 3 devices, 3 measurements = approximately 5443200 entries)
+//at 10 minute intervals
+var query = "select device_id, time, value from measurements "
+query += " where id > (select max(id)-5443200 from measurements) "
+query += " and measurement_type_id=1 and time%600 = 0"
+
+
 var my_err_handler = function(err) {
 	if (err) {
 		console.log(err);
@@ -15,7 +23,7 @@ http.createServer(function (request, response) {
 //		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.writeHead(200, {"Content-Type":"application/json"});
 
-		db.all("select device_id, time, value from measurements where time > (select max(time)-7200 from measurements) and measurement_type_id=1", function(err, rows) {
+		db.all(query, function(err, rows) {
 			if (err) {
 				my_err_handler(err);
 			} else {
