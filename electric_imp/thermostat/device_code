@@ -1,0 +1,84 @@
+//amount (in seconds) to substract from the devices time
+//to correct for timezone and daylight savings
+local timezone_dst_adjustment = 4*3600;
+
+//time setpoints in seconds - times when the temperature setpoint
+//changes
+local time_setpoints = [8*3600, 
+    17*3600, 
+    21.5*3600, 
+    25*3600];
+
+//temperature setpoints in degrees Farenheit
+local temperature_setpoints = [55, 
+    66, 
+    68, 
+    55];
+
+local seconds_per_day = 24*60*60;
+
+local deviceId = hardware.getdeviceid();
+
+local sleep_interval = 1200;
+local on_voltage = 1.2;
+local num_temp_readings = 7;
+
+server.log(format("thermostat deviceId:  %s", deviceId))
+
+local ssr_in = hardware.pin1;
+ssr_in.configure(ANALOG_OUT);
+
+local tmp36 = hardware.pin9;
+tmp36.configure(ANALOG_IN);
+
+function get_temperature_setpoint() {
+    local seconds = (time() - timezone_dst_adjustment) % seconds_per_day;
+    
+    local i = 0;
+    while (seconds > time_setpoints[i]) {i++;}
+    
+    return temperature_setpoints[i];
+}
+
+function read_temperature() {
+    local voltages = [];
+    for (local i = 0; i < num_temp_readings; i++) {
+        local hw = hardware.voltage();
+        local r = tmp36.read();
+        local V = hw * r / 65536;
+        voltages.append(V);
+    }
+    voltages.sort();
+    
+    local median_index = (num_temp_readings - 1) / 2;
+    
+    local median_V = voltages[median_index];
+    local median_T = (median_V * 104.0) - 54.0
+    local T_F = 1.8*median_T + 32
+    return T_F;
+}
+
+
+function regulate_temperature() {
+    local T = read_temperature();
+    
+    local T_setpoint = get_temperature_setpoint();
+    
+    local turn_on = T < T_setpoint;
+    if (turn_on) {
+        local hw = hardware.voltage();
+        local dac_output = on_voltage / hw;
+        ssr_in.write(dac_output);
+    } else {
+        ssr_in.write(0.0);
+    }
+    
+    server.log(format("T:  %f  T_setpoint:  %f", T, T_setpoint));
+    server.log("turn_on: " + turn_on);
+    local now = date();
+    server.log(format("%i-%i-%i %i:%i:%i", now.year, now.month+1, now.day,now.hour,now.min,now.sec));
+    imp.wakeup(sleep_interval, regulate_temperature);
+}
+
+
+regulate_temperature();
