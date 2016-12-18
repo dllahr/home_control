@@ -10,7 +10,7 @@
 	$("#myDiv").html("loading data (10-15 s)");
 	$("body").css("cursor", "progress");
 
-	$.ajax({url:"homeControl/", success: function(result) {
+	$.ajax({url:"../homeControl/", success: function(result) {
 		$("#myDiv").html("data retrieved, formatting");
 
 		var deviceMap = {};
@@ -19,7 +19,7 @@
 			var deviceId = r["device_id"];
 			
 			if (!(deviceId in deviceMap)) {
-				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter"};
+				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter", name:deviceId};
 			}
 
 			var deviceData = deviceMap[deviceId];
