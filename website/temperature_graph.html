@@ -13,13 +13,20 @@
 	$.ajax({url:"../homeControl/", success: function(result) {
 		$("#myDiv").html("data retrieved, formatting");
 
+		var deviceMetadata = result['deviceMetadata'];
+		console.log(deviceMetadata);
+
 		var deviceMap = {};
-		for (var i = 0; i < result.length; i++) {
-			var r = result[i];
+		for (var i = 0; i < result['data'].length; i++) {
+			var r = result['data'][i];
 			var deviceId = r["device_id"];
 			
 			if (!(deviceId in deviceMap)) {
-				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter", name:deviceId};
+				var curDeviceMetadata = deviceMetadata[deviceId];
+
+				var legendName = curDeviceMetadata['location'] + ' ' + curDeviceMetadata['device_type_name'];
+
+				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter", name:legendName};
 			}
 
 			var deviceData = deviceMap[deviceId];
@@ -28,9 +35,13 @@
 			deviceData["y"].push(r["value"]);
 		}
 
+		var deviceIds = Object.keys(deviceMap);
+		deviceIds.sort();
+
 		var data = [];
-		for (var deviceId in deviceMap) {
-			data.push(deviceMap[deviceId]);
+		for (var i = 0; i < deviceIds.length; i++) {
+			var di = deviceIds[i];
+			data.push(deviceMap[di]);
 		}
 
 		$("#myDiv").html("");
@@ -41,3 +52,4 @@
     </script>
     </body>
 </html>
+

@@ -38,11 +38,14 @@ var insertStmtStr = 'insert into measurements (id, device_id, time, measurement_
 exports.populateMeasurements = function(memDb, fileDbPath, numMeasurements, callback) {
 	var db = new sqlite3.Database(fileDbPath)
 
+	console.log('measurement_buffer populateMeasurements starting query of fileDb');
 	db.all('select max(id) max_id from measurements', function(err, rows) {
-		var max_id = rows[0].max_id;
-		var start_id = max_id - numMeasurements;
+		console.log('measurement_buffer populateMeasurements finished query of fileDb');
 
-		db.all('select * from measurements where id > ?', start_id, function(err, rows) {
+		var maxId = rows[0].max_id;
+		var startId = maxId - numMeasurements;
+
+		db.all('select * from measurements where id > ?', startId, function(err, rows) {
 			var stmt = memDb.prepare(insertStmtStr);
 
 			console.log('measurement_buffer populateMeasurements running statements');
@@ -71,6 +74,7 @@ exports.buildAndPopulateBuffer = function(dbScriptsDirectoryPath, fileDbPath, nu
 	var db = exports.buildMemoryDb(buildScripts);
 
 	exports.populateMeasurements(db, fileDbPath, numMeasurements, function() {
+		console.log('measurement_buffer buildAndPopulateBuffer buffer preparation complete, calling callback');
 		callback(db);
 	});
 };

@@ -31,6 +31,11 @@ var testBuildMemoryDb = function() {
 		console.log('measurements table exists and is empty as expected');
 	});
 
+	db.all('select * from device d join device_type dt on dt.id = d.device_type_id', function(err, rows) {
+		assert(rows.length > 0);
+		console.log('rows.length:  ' + rows.length);
+		console.log('JSON.stringify(rows[0]):  ' + JSON.stringify(rows[0]));
+	});
 };
 
 
