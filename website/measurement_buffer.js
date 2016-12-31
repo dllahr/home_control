@@ -1,5 +1,5 @@
-var sqlite3 = require('sqlite3').verbose();
-var fs = require('fs');
+const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 
 var exports = module.exports = {};
 
