@@ -5,13 +5,16 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     </head>
     <body>
+	<div id="latestValuesDiv"></div>
         <div id="myDiv" style="width: 1024px; height: 768px;"><!-- Plotly chart will be drawn inside this DIV --></div>
     <script>
-	$("#myDiv").html("loading data (10-15 s)");
+	var latestValuesDiv = $("#latestValuesDiv");
+	latestValuesDiv.html("loading data (10-15 s)");
+
 	$("body").css("cursor", "progress");
 
 	$.ajax({url:"../homeControl/", success: function(result) {
-		$("#myDiv").html("data retrieved, formatting");
+		latestValuesDiv.html("data retrieved, formatting");
 
 		var deviceMetadata = result['deviceMetadata'];
 		console.log(deviceMetadata);
@@ -38,13 +41,27 @@
 		var deviceIds = Object.keys(deviceMap);
 		deviceIds.sort();
 
+		var tableHtml ='<table style="border-collapse:separate; border-spacing:5px;">';
+		tableHtml += '<tr><th>Latest Temperature (F)</th><th>Location</th><th>Latest Time</th></tr>';
 		var data = [];
 		for (var i = 0; i < deviceIds.length; i++) {
 			var di = deviceIds[i];
-			data.push(deviceMap[di]);
-		}
+			var curData = deviceMap[di];
+			data.push(curData);
 
-		$("#myDiv").html("");
+			var lastIndex = curData.x.length - 1;
+			var latestTime = curData.x[lastIndex];
+			var latestTemperature = curData.y[lastIndex];
+			var rowHtml = '<tr>';
+			rowHtml += '<td>' + latestTemperature + '</td>';
+			rowHtml += '<td>' + curData.name + '</td>';
+			rowHtml += '<td>' + latestTime + '</td>';
+			rowHtml += '</tr>';
+			tableHtml += rowHtml;
+		}
+		tableHtml += '</table>';
+		latestValuesDiv.html(tableHtml);
+
 		$("body").css("cursor", "default");
 		Plotly.newPlot("myDiv", data);
 	}
