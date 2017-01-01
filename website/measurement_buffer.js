@@ -43,9 +43,11 @@ exports.populateMeasurements = function(memDb, fileDbPath, numMeasurements, call
 		console.log('measurement_buffer populateMeasurements finished query of fileDb');
 
 		var maxId = rows[0].max_id;
-		var startId = maxId - numMeasurements;
+		//we (currently) make 3 measurements - temperature, light level, hardware voltage - to get the actual number of temperature measurements,
+		//there will be 3 times as many actual entries, so multiply by 3
+		var startId = maxId - numMeasurements*3;
 
-		db.all('select * from measurements where id > ?', startId, function(err, rows) {
+		db.all('select * from measurements where id > ? and measurement_type_id in (1,4)', startId, function(err, rows) {
 			var stmt = memDb.prepare(insertStmtStr);
 
 			console.log('measurement_buffer populateMeasurements running statements');

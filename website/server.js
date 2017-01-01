@@ -5,13 +5,7 @@ const measurementBuffer = require('./measurement_buffer');
 
 var fileDbPath = '/media/raid/dllahr/projects/temperatureMonitoring/measurements.sqlite3';
 
-
-//This query returns the temperature data (measurement_type_id=1) for 
-//the most recently recorded week (1 week = 604800 s, 3 devices, 3 measurements = approximately 5443200 entries)
-//at 10 minute intervals
-var query = 'select device_id, time, value from measurements '
-query += ' where id > (select max(id)-5443200 from measurements) '
-query += ' and measurement_type_id=1 and time%10 = 0';
+query = 'select device_id, time, value from measurements where measurement_type_id=1 and time%60 = 0 and id > ?';
 
 var insertStmtStr = 'insert into measurements (device_id, time, measurement_type_id, value, measurement_unit_id) values (?, ?, ?, ?, ?)';
 
@@ -28,7 +22,7 @@ var my_err_handler = function(err) {
 var db = new sqlite3.Database(fileDbPath);
 
 
-measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database', fileDbPath, 10000, function(memDb) {
+measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database', fileDbPath, 500000, function(memDb) {
 	http.createServer(function (request, response) {
 		if (request.method == 'GET') {
 			response.writeHead(200, {'Content-Type':'application/json'});
@@ -40,13 +34,17 @@ measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database'
 					deviceMetadata[curDevice.id] = curDevice;
 				}
 
-				memDb.all(query, function(err, dataRows) {
-					if (err) {
-						my_err_handler(err);
-					} else {
-						var data = {"deviceMetadata":deviceMetadata, "data":dataRows};
-						response.end(JSON.stringify(data));
-					}
+				memDb.all('select min(id) min_id, max(id) max_id from measurements', function(err, rows) {
+					var startId = (rows[0].max_id + rows[0].min_id) / 2;
+
+					memDb.all(query, startId, function(err, dataRows) {
+						if (err) {
+							my_err_handler(err);
+						} else {
+							var data = {"deviceMetadata":deviceMetadata, "data":dataRows};
+							response.end(JSON.stringify(data));
+						}
+					});
 				});
 			});
 
@@ -78,11 +76,9 @@ measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database'
 					
 					var ll = formData.lightLevels[i];
 					stmt.run(deviceId, t, 2, ll, 2, my_err_handler);
-					memStmt.run(deviceId, t, 2, ll, 2, my_err_handler);
 
 					var hwv = formData.hardwareVoltages[i];
 					stmt.run(deviceId, t, 3, hwv, 3, my_err_handler);
-					memStmt.run(deviceId, t, 3, hwv, 3, my_err_handler);
 				}
 				stmt.finalize();
 				memStmt.finalize();
@@ -90,7 +86,7 @@ measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database'
 				memDb.all('select min(id) min_id from measurements', function(err, rows) {
 					var minId = rows[0].min_id;
 
-					var maxDeleteId = minId + 3*numEntries;
+					var maxDeleteId = minId + numEntries;
 					
 					memDb.run('delete from measurements where id < ?', maxDeleteId);
 				});
