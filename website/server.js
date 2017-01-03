@@ -25,24 +25,28 @@ var db = new sqlite3.Database(fileDbPath);
 measurementBuffer.buildAndPopulateBuffer('/home/lahr/code/home_control/database', fileDbPath, 500000, function(memDb) {
 	http.createServer(function (request, response) {
 		if (request.method == 'GET') {
-			response.writeHead(200, {'Content-Type':'application/json'});
 
 			memDb.all(deviceMetadataQuery, function(err, deviceRows) {
+				console.log('data requested, getting device metadata');
 				var deviceMetadata = {};
 				for (var i = 0; i < deviceRows.length; i++) {
 					var curDevice = deviceRows[i];
 					deviceMetadata[curDevice.id] = curDevice;
 				}
 
+				console.log('getting min and max ids from measurements table');
 				memDb.all('select min(id) min_id, max(id) max_id from measurements', function(err, rows) {
-					var startId = (rows[0].max_id + rows[0].min_id) / 2;
+					var startId = 0.75*(rows[0].max_id - rows[0].min_id) + rows[0].min_id;
 
+					console.log('retrieving rows from measurements table');
 					memDb.all(query, startId, function(err, dataRows) {
 						if (err) {
 							my_err_handler(err);
 						} else {
+							console.log('measurements retrieved from database, sending response');
 							var data = {"deviceMetadata":deviceMetadata, "data":dataRows};
-							response.end(JSON.stringify(data));
+							response.writeHead(200, {'Content-Type':'application/json'});
+							response.end(JSON.stringify(data), function() {console.log('finished sending measurements data');});
 						}
 					});
 				});
