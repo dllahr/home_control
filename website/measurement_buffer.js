@@ -32,11 +32,18 @@ exports.buildMemoryDb = function(buildScripts) {
 	return db;
 };
 
+exports.buildMemoryDbFromPath = function(dbScriptsDirectoryPath) {
+	var buildScripts = exports.readBuildScripts(dbScriptsDirectoryPath, exports.buildScriptFiles);
+
+	var db = exports.buildMemoryDb(buildScripts);
+
+	return db
+};
 
 var insertStmtStr = 'insert into measurements (id, device_id, time, measurement_type_id, value, measurement_unit_id) values (?, ?, ?, ?, ?, ?)';
 
 exports.populateMeasurements = function(memDb, fileDbPath, numMeasurements, callback) {
-	var db = new sqlite3.Database(fileDbPath)
+	var db = new sqlite3.Database(fileDbPath);
 
 	console.log('measurement_buffer populateMeasurements starting query of fileDb');
 	db.all('select max(id) max_id from measurements', function(err, rows) {
@@ -71,9 +78,7 @@ exports.populateMeasurements = function(memDb, fileDbPath, numMeasurements, call
 
 
 exports.buildAndPopulateBuffer = function(dbScriptsDirectoryPath, fileDbPath, numMeasurements, callback) {
-	var buildScripts = exports.readBuildScripts(dbScriptsDirectoryPath, exports.buildScriptFiles);
-
-	var db = exports.buildMemoryDb(buildScripts);
+	var db = exports.buildMemoryDbFromPath(dbScriptsDirectoryPath);
 
 	exports.populateMeasurements(db, fileDbPath, numMeasurements, function() {
 		console.log('measurement_buffer buildAndPopulateBuffer buffer preparation complete, calling callback');

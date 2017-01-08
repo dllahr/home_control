@@ -1,7 +1,8 @@
 const assert = require('assert');
 const mb = require('./measurement_buffer');
 
-var testFileDbPath = "test_measurement_buffer.sqlite3"
+
+const testFileDbPath = "test_measurement_buffer.sqlite3"
 
 var testReadBuildScripts = function() {
 	console.log('test_measurement_buffer testReadBuildScripts');
@@ -35,6 +36,19 @@ var testBuildMemoryDb = function() {
 		assert(rows.length > 0);
 		console.log('rows.length:  ' + rows.length);
 		console.log('JSON.stringify(rows[0]):  ' + JSON.stringify(rows[0]));
+	});
+};
+
+
+var testBuildMemoryDbFromPath = function () {
+	var db = mb.buildMemoryDbFromPath('../database');
+
+	db.all('select count(*) N from device', function(err, rows) {
+		assert(rows[0].N > 0);
+	});
+
+	db.all('select count(*) N from measurements', function(err, rows) {
+		assert(rows[0].N == 0);
 	});
 };
 
@@ -77,6 +91,9 @@ testReadBuildScripts();
 console.log();
 
 testBuildMemoryDb();
+console.log();
+
+testBuildMemoryDbFromPath();
 console.log();
 
 testPopulateMeasurements();
