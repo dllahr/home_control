@@ -1,6 +1,7 @@
 var exports = module.exports = {};
 
 
+//args will typically be 'process.argv' from the calling script
 exports.run = function(args, testCases) {
 	if (args.length >= 3) {
 		for (var i = 2; i < args.length; i++) {

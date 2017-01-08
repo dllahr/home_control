@@ -2,15 +2,17 @@ const assert = require('assert');
 const db = require('./database');
 const sqlite3 = require('sqlite3').verbose();
 const measurementBuffer = require('./measurement_buffer');
+const run_tests = require('./run_tests');
 
 
 const testFileDbPath = "test_database.sqlite3"
 
+var testCases = {};
 
 const testDb =  new sqlite3.Database(testFileDbPath);
 
 
-const testGetRecentTemperatureData = function() {
+testCases.testGetRecentTemperatureData = function() {
 	console.log('test_database testGetRecentTemperatureData');
 
 	db.getRecentTemperatureData(1000, testDb, 30, function(data) {
@@ -30,7 +32,7 @@ const testGetRecentTemperatureData = function() {
 };
 
 
-const testSaveData = function() {
+testCases.testSaveData = function() {
 	console.log('test_database testSaveData');
 
 	var fileDb = measurementBuffer.buildMemoryDbFromPath('../database');
@@ -79,6 +81,6 @@ const testSaveData = function() {
 	});
 };
 
-testGetRecentTemperatureData();
 
-testSaveData();
+run_tests.run(process.argv, testCases);
+

@@ -1,10 +1,14 @@
 const assert = require('assert');
 const mb = require('./measurement_buffer');
+const run_tests = require('./run_tests');
 
 
 const testFileDbPath = "test_measurement_buffer.sqlite3"
 
-var testReadBuildScripts = function() {
+var testCases = {};
+
+
+testCases.testReadBuildScripts = function() {
 	console.log('test_measurement_buffer testReadBuildScripts');
 	var r = mb.readBuildScripts('../database', mb.buildScriptFiles);
 	assert(r.length > 0)
@@ -13,7 +17,7 @@ var testReadBuildScripts = function() {
 };
 
 
-var testBuildMemoryDb = function() {
+testCases.testBuildMemoryDb = function() {
 	console.log('test_measurement_buffer testBuildMemoryDb');
 
 	var buildScripts = mb.readBuildScripts('../database', mb.buildScriptFiles);
@@ -40,7 +44,7 @@ var testBuildMemoryDb = function() {
 };
 
 
-var testBuildMemoryDbFromPath = function () {
+testCases.testBuildMemoryDbFromPath = function () {
 	var db = mb.buildMemoryDbFromPath('../database');
 
 	db.all('select count(*) N from device', function(err, rows) {
@@ -53,7 +57,7 @@ var testBuildMemoryDbFromPath = function () {
 };
 
 
-var testPopulateMeasurements = function () {
+testCases.testPopulateMeasurements = function () {
 	console.log('test_measurement_buffer testPopulateMemoryDb');
 
 	var buildScripts = mb.readBuildScripts('../database', mb.buildScriptFiles);
@@ -73,7 +77,7 @@ var testPopulateMeasurements = function () {
 };
 
 
-var testBuildAndPopulateBuffer = function() {
+testCases.testBuildAndPopulateBuffer = function() {
 	console.log('test_measurement_buffer testBuildAndPopulateBuffer');
 	var N = 100;
 	mb.buildAndPopulateBuffer('../database', testFileDbPath, N, function(db) {
@@ -87,18 +91,6 @@ var testBuildAndPopulateBuffer = function() {
 	});
 };
 
-testReadBuildScripts();
-console.log();
 
-testBuildMemoryDb();
-console.log();
-
-testBuildMemoryDbFromPath();
-console.log();
-
-testPopulateMeasurements();
-console.log();
-
-testBuildAndPopulateBuffer();
-console.log();
+run_tests.run(process.argv, testCases);
 
