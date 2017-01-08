@@ -11,7 +11,7 @@ const insertStmtStr = 'insert into measurements (device_id, time, measurement_ty
 const deviceMetadataQuery = 'select d.*, dt.name device_type_name, dt.description as device_type_description from device d join device_type dt on dt.id = d.device_type_id';
 
 
-exports.getRecentTemperatureData = function(numRecentEntries, db, timeStep, callback) {
+exports.getDeviceMetadata = function(db, callback) {
 	db.all(deviceMetadataQuery, function(err, deviceRows) {
 		console.log('data requested, getting device metadata');
 		var deviceMetadata = {};
@@ -19,6 +19,14 @@ exports.getRecentTemperatureData = function(numRecentEntries, db, timeStep, call
 			var curDevice = deviceRows[i];
 			deviceMetadata[curDevice.id] = curDevice;
 		}
+
+		callback(deviceMetadata);
+	});
+};
+
+
+exports.getRecentTemperatureData = function(numRecentEntries, db, timeStep, callback) {
+	exports.getDeviceMetadata(db, function(deviceMetadata) {
 
 		console.log('getting max id from measurements table');
 		db.all('select max(id) max_id from measurements', function(err, rows) {

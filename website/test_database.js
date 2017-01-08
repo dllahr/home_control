@@ -12,6 +12,22 @@ var testCases = {};
 const testDb =  new sqlite3.Database(testFileDbPath);
 
 
+testCases.testGetDeviceMetadata = function() {
+	console.log('tests_database testGetDeviceMetadata');
+
+	db.getDeviceMetadata(testDb, function(r) {
+		for (var deviceId in r) {
+			var curDevice = r[deviceId];
+			console.log('curDevice:  ' + JSON.stringify(curDevice));
+			assert(deviceId == curDevice.id);
+		}
+
+		var numDevices = Object.keys(r).length;
+		assert(numDevices > 0);
+		console.log('numDevices:  ' + numDevices);
+	});
+};
+
 testCases.testGetRecentTemperatureData = function() {
 	console.log('test_database testGetRecentTemperatureData');
 
