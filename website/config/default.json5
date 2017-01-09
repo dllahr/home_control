@@ -1,0 +1,35 @@
+{
+	alerts:
+	{
+		gmailUsername:  'CHANGE ME',
+		gmailPassword:  'CHANGE ME',
+		emailAddresses:  'CHANGE ME',
+		lastTimeOffset:  1800,
+		minTemperature:  38,
+		sleepTime:  300000,
+		initialDelay:  600000
+	},
+
+	memoryBuffer:
+	{
+		bufferSize: 500000,
+	},
+
+	server:
+	{
+		port: 8124,
+	},
+
+	database:
+	{
+		databaseCodeDirectory:  '/home/lahr/code/home_control/database',
+		fileDbPath:  '/media/raid/dllahr/projects/temperatureMonitoring/measurements.sqlite3',
+
+		recentQuery:
+		{
+			numEntries: 125000,
+			timeStep:  60
+		}
+	}
+}
+

@@ -84,7 +84,7 @@ exports.saveData = function(formData, db, memDb, callback) {
 	});
 
 	if ('thermostatOnOff' in formData && formData['thermostatOnOff'] != null) {
-		var mostRecentTime = formData.readTimes.slice(-1)[0];
+		var mostRecentTime = formData.readTimes[numEntries - 1];
 		var value = formData.thermostatOnOff;
 		console.log('adding thermostatOnOff entry value:  ' + value + ' typeof(value):  ' + typeof(value));
 		db.run(insertStmtStr, deviceId, mostRecentTime, 4, value, 4);
