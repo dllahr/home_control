@@ -140,7 +140,8 @@ exports.checkForNoCommunication = function(deviceAlertInfo, alertsConfig) {
 
 exports.checkForTemperatureAlert = function(deviceAlertInfo) {
 	console.log('alerts checkForTemperatureAlert');
-
+	console.log('deviceAlertInfo:  ' + JSON.stringify(deviceAlertInfo));
+	
 	var msg = '';
 	if ('alertSettings' in deviceAlertInfo) {
 		var alertSettings = deviceAlertInfo.alertSettings;
