@@ -12,12 +12,12 @@
 
 	memoryBuffer:
 	{
-		bufferSize: 500000,
+		bufferSize: 500000
 	},
 
 	server:
 	{
-		port: 8124,
+		port: 8124
 	},
 
 	database:
