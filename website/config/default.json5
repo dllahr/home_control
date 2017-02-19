@@ -6,7 +6,6 @@
 		gmailPassword:  'CHANGE ME',
 		emailAddresses:  'CHANGE ME',
 		lastTimeOffset:  1800,
-		minTemperature:  38,
 		sleepTime:  300000,
 		initialDelay:  600000
 	},

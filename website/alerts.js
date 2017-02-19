@@ -42,17 +42,23 @@ exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksF
 
 exports.buildInitialAlertInfo = function(db, callback) {
 	database.getDeviceMetadata(db, function(deviceMetadata) {
-		for (var id in deviceMetadata) {
-			var curDevice = deviceMetadata[id];
-			curDevice.lastTime = null;
-			curDevice.lastTemperature = null;
+		database.getAlertSettings(db, function(alertSettings){
+			for (var id in deviceMetadata) {
+				var curDevice = deviceMetadata[id];
+				curDevice.lastTime = null;
+				curDevice.lastTemperature = null;
 
-			if (curDevice.device_type_id in exports.thermostatDeviceTypeIds) {
-				curDevice.thermostatInfo = {onOff:false, temperatureAtOnReport:null};
+				if (id in alertSettings) {
+					curDevice.alertSettings = alertSettings[id];
+				}
+
+				if (curDevice.device_type_id in exports.thermostatDeviceTypeIds) {
+					curDevice.thermostatInfo = {onOff:false, temperatureAtOnReport:null};
+				}
 			}
-		}
 
-		callback(deviceMetadata);
+			callback(deviceMetadata);
+		});
 	});
 };
 
@@ -132,16 +138,41 @@ exports.checkForNoCommunication = function(deviceAlertInfo, alertsConfig) {
 };
 
 
-exports.checkForLowTemperature = function(deviceAlertInfo, alertsConfig) {
-	console.log('alerts checkForLowTemperature');
+exports.checkForTemperatureAlert = function(deviceAlertInfo) {
+	console.log('alerts checkForTemperatureAlert');
 
-	if (deviceAlertInfo.lastTemperature < alertsConfig.minTemperature) {
-		var msg = 'low temperature measured<br/>';
-		msg += 'measured temperature(F):  ' + deviceAlertInfo.lastTemperature + '<br/>';
-		msg += 'minimum temperature threshold(F):  ' + alertsConfig.minTemperature + '<br/>';
-		msg += 'time:  ' + (new Date(deviceAlertInfo.lastTime*1000)) + '<br/>';
-		msg += 'time (epoch, s):  ' + deviceAlertInfo.lastTime + '<br/>';
-		return {subject:'low temperature measured', message:msg};
+	var msg = '';
+	if ('alertSettings' in deviceAlertInfo) {
+		var alertSettings = deviceAlertInfo.alertSettings;
+		console.log('checking for alert(s) using found alertSettings:  ' + JSON.stringify(alertSettings));
+
+		for (var i = 0; i < alertSettings.length; i++) {
+			var threshold = alertSettings[i].threshold;
+			var comparison = alertSettings[i].comparison;
+
+			var isAlerted = false;
+			if ('<' == comparison) {
+				isAlerted = deviceAlertInfo.lastTemperature < threshold;
+			} else if ('>' == comparison) {
+				isAlerted = deviceAlertInfo.lastTemperature > threshold;
+			} else {
+				msg += 'unrecognized comparison in alert settings - deviceAlertInfo:  ';
+				msg += JSON.stringify(deviceAlertInfo) + '<br/>';
+			}
+
+			if (true == isAlerted) {
+				msg += 'temperature alert measured<br/>';
+				msg += 'measured temperature(F):  ' + deviceAlertInfo.lastTemperature + '<br/>';
+				msg += 'temperature threshold(F):  ' + threshold + '<br/>';
+				msg += 'comparison:  ' + comparison + '<br/>';
+				msg += 'time:  ' + (new Date(deviceAlertInfo.lastTime*1000)) + '<br/>';
+				msg += 'time (epoch, s):  ' + deviceAlertInfo.lastTime + '<br/>';
+			}
+		}
+	}
+
+	if (msg != '') {
+		return {subject:'temperature alert(s) measured', message:msg};
 	} else {
 		return null;
 	}
@@ -159,7 +190,7 @@ exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 		sendAlertFunction = exports.SendAlert;
 	}
 
-	var alertFunctions = [exports.checkForNoCommunication, exports.checkForLowTemperature];
+	var alertFunctions = [exports.checkForNoCommunication, exports.checkForTemperatureAlert];
 	var alerts = [];
 	for (var id in alertInfo) {
 		var deviceAlertInfo = alertInfo[id];

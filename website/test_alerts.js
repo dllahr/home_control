@@ -13,6 +13,8 @@ const testDb =  new sqlite3.Database(testFileDbPath);
 
 
 testCases.testBuildInitialAlertInfo = function() {
+	console.log('test_alerts testBuildInitialAlertInfo');
+	
 	alerts.buildInitialAlertInfo(testDb, function(alertInfo) {
 		var N = Object.keys(alertInfo).length;
 		console.log('N:  ' + N);
@@ -31,21 +33,26 @@ testCases.testBuildInitialAlertInfo = function() {
 				assert('onOff' in ti);
 				assert('temperatureAtOnReport' in ti);
 			}
+			console.log();
 		}
 	});
 };
 
 
 testCases.testUpdateAlertInfo = function() {
+	console.log('test_alerts testUpdateAlertInfo');
+
 	var alertInfo = {myFakeDevice:{id:'myFakeDevice', lastTime:0, lastTemperature:1}};
 	var formData = {deviceId:'myFakeDevice', readTimes:[1,2], temperaturesF:[3,5]};
 	console.log('formData:  ' + JSON.stringify(formData));
+	console.log();
 
 	//happy path non-thermostat
 	alerts.updateAlertInfo(formData, alertInfo);
 	console.log('happy path non-thermostat - alertInfo:  ' + JSON.stringify(alertInfo));
 	assert(2 == alertInfo.myFakeDevice.lastTime);
 	assert(5 == alertInfo.myFakeDevice.lastTemperature);
+	console.log();
 
 	//happy path thermostat device but no thermostat info in formData
 	alertInfo.myFakeDevice.lastTime = 0;
@@ -57,6 +64,7 @@ testCases.testUpdateAlertInfo = function() {
 	assert(5 == alertInfo.myFakeDevice.lastTemperature);
 	assert(false == alertInfo.myFakeDevice.thermostatInfo.onOff);
 	assert(null == alertInfo.myFakeDevice.thermostatInfo.temperatureAtOnReport);
+	console.log();
 
 	//happy path thermostat device but thermostat info in formData is null
 	alertInfo.myFakeDevice.lastTime = 0;
@@ -69,6 +77,7 @@ testCases.testUpdateAlertInfo = function() {
 	assert(5 == alertInfo.myFakeDevice.lastTemperature);
 	assert(false == alertInfo.myFakeDevice.thermostatInfo.onOff);
 	assert(null == alertInfo.myFakeDevice.thermostatInfo.temperatureAtOnReport);
+	console.log();
 
 	//happy path thermostat device thermostat info indicates on
 	alertInfo.myFakeDevice.lastTime = 0;
@@ -81,6 +90,7 @@ testCases.testUpdateAlertInfo = function() {
 	assert(5 == alertInfo.myFakeDevice.lastTemperature);
 	assert(true == alertInfo.myFakeDevice.thermostatInfo.onOff);
 	assert(5 == alertInfo.myFakeDevice.thermostatInfo.temperatureAtOnReport);
+	console.log();
 
 	//happy path thermostat device thermostat info indicates on, later time
 	alertInfo.myFakeDevice.lastTime = 0;
@@ -95,6 +105,7 @@ testCases.testUpdateAlertInfo = function() {
 	assert(11 == alertInfo.myFakeDevice.lastTemperature);
 	assert(true == alertInfo.myFakeDevice.thermostatInfo.onOff);
 	assert(5 == alertInfo.myFakeDevice.thermostatInfo.temperatureAtOnReport);
+	console.log();
 
 	//happy path thermostat device thermostat info indicates off, later time
 	alertInfo.myFakeDevice.lastTime = 0;
@@ -109,13 +120,16 @@ testCases.testUpdateAlertInfo = function() {
 	assert(17 == alertInfo.myFakeDevice.lastTemperature);
 	assert(false == alertInfo.myFakeDevice.thermostatInfo.onOff);
 	assert(null == alertInfo.myFakeDevice.thermostatInfo.temperatureAtOnReport);
+	console.log();
 };
 
 
 testCases.testSendAlert = function() {
+	console.log('test_alerts testSendAlert');
 	var alertConfig = config.get('alerts');
 	alerts.sendAlert(alertConfig.gmailUsername, alertConfig.gmailPassword, alertConfig.emailAddresses,
 		'test message from node - this is subject', 'test message from node - this is the body<br/><b>Hi bear hi!</b>');
+	console.log();
 };
 
 
@@ -129,6 +143,7 @@ testCases.testCheckForNoCommunication = function() {
 	var r = alerts.checkForNoCommunication(deviceAlertInfo, alertConfig);
 	console.log('no lack of communication alert expected - r:  ' + r);
 	assert(null == r);
+	console.log();
 
 	deviceAlertInfo.lastTime = now - 200;
 	r = alerts.checkForNoCommunication(deviceAlertInfo, alertConfig);
@@ -136,25 +151,53 @@ testCases.testCheckForNoCommunication = function() {
 	assert(null != r);
 	assert('subject' in r);
 	assert('message' in r);
+	console.log();
 };
 
 
-testCases.testCheckForLowTemperature = function() {
-	console.log('test_alerts testCheckForLowTemperature');
+testCases.testCheckForTemperatureAlert = function() {
+	console.log('test_alerts testCheckForTemperatureAlert');
 
-	var alertConfig = {minTemperature:40};
-
-	var deviceAlertInfo = {lastTime:1000000000, lastTemperature:50};
-	var r = alerts.checkForLowTemperature(deviceAlertInfo, alertConfig);
-	console.log('no low temperature expected - r:  ' + r);
+	console.log('no alert settings therefore no check performed');
+	var r = alerts.checkForTemperatureAlert({});
+	console.log('no temperature alert expected - r:  ' + r);
 	assert(null == r);
+	console.log();
 
-	deviceAlertInfo.lastTemperature = 30;
-	r = alerts.checkForLowTemperature(deviceAlertInfo, alertConfig);
+	console.log('alert settings present and temperature above threshold and less than comparison');
+	var deviceAlertInfo = {lastTemperature:50.0, alertSettings:[{comparison:'<',
+		treshold:38.0}]};
+	r = alerts.checkForTemperatureAlert(deviceAlertInfo);
+	console.log('no temperature alert expected - r:  ' + r);
+	assert(null == r);
+	console.log();
+
+	console.log('alert settings present and temperature above threshold and less than comparison');
+	deviceAlertInfo.alertSettings = [{comparison:">", treshold:70.0}];
+	r = alerts.checkForTemperatureAlert(deviceAlertInfo);
+	console.log('no temperature alert expected - r:  ' + r);
+	assert(null == r);
+	console.log();
+
+	console.log('alert settings present but unrecognized comparison');
+	deviceAlertInfo.alertSettings[0].comparison = "hello world";
+	r = alerts.checkForTemperatureAlert(deviceAlertInfo);
+	console.log('temperature alert expected - r:  ' + JSON.stringify(r));
+	assert(null != r);
+	assert('message' in r);
+	assert(r.message.search('unrecognized comparison') != -1);
+	console.log();
+
+	console.log('alert settings present and alert condition is true');
+	deviceAlertInfo = {lastTemperature:30.0, lastTime:10000000,
+		alertSettings:[{comparison:'<', threshold:38.0}]};
+	r = alerts.checkForTemperatureAlert(deviceAlertInfo);
 	console.log('low temperature alert expected - r:  ' + JSON.stringify(r));
 	assert(null != r);
 	assert('subject' in r);
 	assert('message' in r);
+	assert(r.message.search('temperature alert measured') != -1);
+	console.log();
 };
 
 
@@ -166,32 +209,41 @@ testCases.testCheckForAlerts = function() {
 		alertRecords.push([subject, message]);
 	};
 
-	var alertsConfig = {lastTimeOffset: 1000, minTemperature: 40, enableEmail: true};
+	var alertsConfig = {lastTimeOffset: 1000, enableEmail: true};
 
 	var now = (new Date()).getTime() / 1000;
-	var alertInfo = {myFakeDevice:{id:'myFakeDevice', lastTime:now, lastTemperature:50}};
+	var alertInfo = {myFakeDevice:{
+		id:'myFakeDevice',
+		lastTime:now,
+		lastTemperature:50,
+		alertSettings:[{comparison:'<', threshold:40.0}]}
+	};
 
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('no message expected - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 0);
+	console.log();
 
 	alertInfo.myFakeDevice.lastTime = 1000;
 	alertInfo.myFakeDevice.otherMetadata = 'here\'s some other metadata';
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('1 message expected - no communication - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 1);
+	console.log();
 
 	alertRecords = [];
 	alertInfo.myFakeDevice.lastTemperature = 30;
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('2 message expected - no communication - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 1);
+	console.log();
 
 	alertRecords = [];
 	alertInfo.myFakeDevice2 = {id:'myFakeDevice2', lastTime:now, lastTemperature:50};
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('2 message expected - no communication - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 1);
+	console.log();
 
 	alertRecords = [];
 	alertInfo.myFakeDevice2.lastTime = 222222;
@@ -199,6 +251,7 @@ testCases.testCheckForAlerts = function() {
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('2 message expected - no communication - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 1);
+	console.log();
 };
 
 

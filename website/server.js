@@ -18,22 +18,26 @@ const alertsConfig = config.get('alerts');
 const db = new sqlite3.Database(dbConfig.fileDbPath);
 
 
-measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfig.fileDbPath, memoryBufferConfig.bufferSize, function(memDb) {
-	alerts.buildInitialAlertInfo(memDb, function(alertInfo) {
+measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfig.fileDbPath,
+	memoryBufferConfig.bufferSize, function(memDb) {
 
+	alerts.buildInitialAlertInfo(db, function(alertInfo) {
 		setTimeout(function() {
-			alerts.alertLoop(alertInfo, alertsConfig, alerts.sendAlert, alerts.checkForAlerts, alertsConfig.sleepTime);
+			alerts.alertLoop(alertInfo, alertsConfig, alerts.sendAlert, alerts.checkForAlerts,
+				alertsConfig.sleepTime);
 		}, alertsConfig.initialDelay);
 
 		http.createServer(function (request, response) {
 			if (request.method == 'GET') {
-				database.getRecentTemperatureData(dbConfig.recentQuery.numEntries, memDb, dbConfig.recentQuery.timeStep, function(data) {
+				database.getRecentTemperatureData(dbConfig.recentQuery.numEntries, db, memDb,
+					dbConfig.recentQuery.timeStep, function(data) {
+
 					response.writeHead(200, {'Content-Type':'application/json'});
 					response.end(JSON.stringify(data), function() {
 						console.log('finished sending measurements data');
 					});
 				});
-			} 
+			}
 			else if (request.method == 'POST') {
 				var requestBody = '';
 				request.on('data', function(data) {
@@ -48,8 +52,7 @@ measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfi
 				});
 			}
 		}).listen(serverPort);
-		
+
 		console.log('Server running at http://127.0.0.1:' + serverPort);
 	});
 });
-

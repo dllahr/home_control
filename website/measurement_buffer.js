@@ -3,7 +3,7 @@ const fs = require('fs');
 
 var exports = module.exports = {};
 
-exports.buildScriptFiles = ['create_tables.sql', 'add_devices.sql', 'update001_add_device_information.sql']
+exports.buildScriptFiles = ['create_tables.sql'];
 
 exports.readBuildScripts = function(scriptDirectoryPath, buildScriptFiles) {
 	var buildScripts = [];
@@ -85,4 +85,3 @@ exports.buildAndPopulateBuffer = function(dbScriptsDirectoryPath, fileDbPath, nu
 		callback(db);
 	});
 };
-

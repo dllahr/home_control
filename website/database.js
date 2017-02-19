@@ -10,6 +10,7 @@ const insertStmtStr = 'insert into measurements (device_id, time, measurement_ty
 
 const deviceMetadataQuery = 'select d.*, dt.name device_type_name, dt.description as device_type_description from device d join device_type dt on dt.id = d.device_type_id';
 
+const alertSettingQuery = 'select device_id, measurement_type_id, mt.name measurement_type_name, comparison, threshold from alert_setting als join measurement_type mt on mt.id = als.measurement_type_id'
 
 exports.getDeviceMetadata = function(db, callback) {
 	db.all(deviceMetadataQuery, function(err, deviceRows) {
@@ -25,15 +26,15 @@ exports.getDeviceMetadata = function(db, callback) {
 };
 
 
-exports.getRecentTemperatureData = function(numRecentEntries, db, timeStep, callback) {
-	exports.getDeviceMetadata(db, function(deviceMetadata) {
+exports.getRecentTemperatureData = function(numRecentEntries, fileDb, memDb, timeStep, callback) {
+	exports.getDeviceMetadata(fileDb, function(deviceMetadata) {
 
 		console.log('getting max id from measurements table');
-		db.all('select max(id) max_id from measurements', function(err, rows) {
+		memDb.all('select max(id) max_id from measurements', function(err, rows) {
 			var startId = rows[0].max_id - numRecentEntries;
 
 			console.log('retrieving rows from measurements table');
-			db.all(recentMeasurementsQuery, timeStep, startId, function(err, dataRows) {
+			memDb.all(recentMeasurementsQuery, timeStep, startId, function(err, dataRows) {
 				if (err) {
 					error_handling.error_handler(err);
 				} else {
@@ -58,14 +59,14 @@ exports.saveData = function(formData, db, memDb, callback) {
 
 	var stmt = db.prepare(insertStmtStr);
 	var memStmt = memDb.prepare(insertStmtStr);
-	
+
 	for (var i = 0; i < numEntries; i++) {
 		var t = formData.readTimes[i];
 
 		var TF = formData.temperaturesF[i];
 		stmt.run(deviceId, t, 1, TF, 1, error_handling.error_handler);
 		memStmt.run(deviceId, t, 1, TF, 1, error_handling.error_handler);
-		
+
 		var ll = formData.lightLevels[i];
 		stmt.run(deviceId, t, 2, ll, 2, error_handling.error_handler);
 
@@ -79,7 +80,7 @@ exports.saveData = function(formData, db, memDb, callback) {
 		var minId = rows[0].min_id;
 
 		var maxDeleteId = minId + numEntries;
-		
+
 		memDb.run('delete from measurements where id < ?', maxDeleteId);
 	});
 
@@ -96,3 +97,19 @@ exports.saveData = function(formData, db, memDb, callback) {
 	}
 };
 
+
+exports.getAlertSettings = function(db, callback) {
+	db.all(alertSettingQuery, function(err, alertSettingRows) {
+		var alertSettings = {};
+		for (var i = 0; i < alertSettingRows.length; i++) {
+			var curRow = alertSettingRows[i];
+			var deviceId = curRow.device_id;
+			if (! (deviceId in alertSettings)) {
+				alertSettings[deviceId] = [];
+			}
+			alertSettings[deviceId].push(curRow);
+		}
+
+		callback(alertSettings);
+	});
+};

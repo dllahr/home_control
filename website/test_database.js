@@ -31,7 +31,7 @@ testCases.testGetDeviceMetadata = function() {
 testCases.testGetRecentTemperatureData = function() {
 	console.log('test_database testGetRecentTemperatureData');
 
-	db.getRecentTemperatureData(1000, testDb, 30, function(data) {
+	db.getRecentTemperatureData(1000, testDb, testDb, 30, function(data) {
 		assert('deviceMetadata' in data);
 		assert('data' in data);
 //		console.log('data:  ' + JSON.stringify(data));
@@ -81,7 +81,7 @@ testCases.testSaveData = function() {
 				assert(r.device_id == 'my_fake_device');
 				assert(r.value == 13.0);
 			});
-			
+
 			fileDb.all('select * from measurements where time=2 and measurement_type_id=3', function(err, rows) {
 				console.log('rows.length:  ' + rows.length);
 				assert(rows.length == 1);
@@ -98,5 +98,22 @@ testCases.testSaveData = function() {
 };
 
 
-run_tests.run(process.argv, testCases);
+testCases.testGetAlertSettings = function() {
+	console.log('tests_database testGetAlertSettings');
 
+	db.getAlertSettings(testDb, function(r) {
+		for (var deviceId in r) {
+			var curDevice = r[deviceId];
+			console.log('curDevice:  ' + JSON.stringify(curDevice));
+			for (var i = 0; i < curDevice.length; i++) {
+				assert(deviceId == curDevice[i].device_id);
+			}
+		}
+
+		var numDevices = Object.keys(r).length;
+		assert(numDevices > 0);
+		console.log('numDevices:  ' + numDevices);
+	});
+};
+
+run_tests.run(process.argv, testCases);
