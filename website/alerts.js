@@ -10,6 +10,14 @@ const alertEmailAddresses = 'dllahr@gmail.com, ams471@mail.harvard.edu';  //lahr
 exports.thermostatDeviceTypeIds = {2:null, 3:null};
 
 
+const consoleLogAlertInfo = function(alertInfo) {
+	console.log('alerts consoleLogAlertInfo');
+	for (id in alertInfo) {
+		console.log('id:  ' + id + '  alertInfo[id]:  ' + JSON.stringify(alertInfo[id]));
+	}
+};
+
+
 //typically called with:
 //alertInfo as object that is built with buildInitialAlertInfo and then updated with updateAlertInfo
 //alertsConfig loaded from config file, alerts section
@@ -19,6 +27,7 @@ exports.thermostatDeviceTypeIds = {2:null, 3:null};
 //
 exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksFunction, sleepTime) {
 	console.log('alerts alertLoop');
+	consoleLogAlertInfo(alertInfo);
 
 	if (!('loopIndex' in alertInfo)) {
 		alertInfo.loopIndex = 0;
@@ -42,7 +51,7 @@ exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksF
 
 exports.buildInitialAlertInfo = function(db, callback) {
 	database.getDeviceMetadata(db, function(deviceMetadata) {
-		database.getAlertSettings(db, function(alertSettings){
+		database.getAlertSettings(db, function(alertSettings) {
 			for (var id in deviceMetadata) {
 				var curDevice = deviceMetadata[id];
 				curDevice.lastTime = null;
@@ -186,6 +195,7 @@ exports.checkForTemperatureAlert = function(deviceAlertInfo) {
 //sendAlertFunction as sendAlerts function in this module
 exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 	console.log('alerts checkForAlerts');
+	consoleLogAlertInfo(alertInfo);
 
 	if (sendAlertFunction == 'undefined' || sendAlertFunction == null) {
 		sendAlertFunction = exports.SendAlert;
@@ -195,6 +205,7 @@ exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 	var alerts = [];
 	for (var id in alertInfo) {
 		var deviceAlertInfo = alertInfo[id];
+		console.log('checking all alerts for id:  ' + id + '  deviceAlertInfo:  ' + JSON.stringify(deviceAlertInfo));
 
 		for (var i = 0; i < alertFunctions.length; i++) {
 			var aFun = alertFunctions[i];
@@ -206,6 +217,9 @@ exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 				alerts.push(r);
 			}
 		}
+
+		console.log('finished checking for id:  ' + id);
+		console.log();
 	}
 
 	if (alerts.length > 0) {
