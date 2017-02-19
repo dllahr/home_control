@@ -25,24 +25,20 @@ const consoleLogAlertInfo = function(alertInfo) {
 //checksFunction as checkForAlerts function in this module
 //sleepTime in milliseconds
 //
-exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksFunction, sleepTime) {
+exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksFunction, sleepTime, loopIndex) {
 	console.log('alerts alertLoop');
 	consoleLogAlertInfo(alertInfo);
-
-	if (!('loopIndex' in alertInfo)) {
-		alertInfo.loopIndex = 0;
-	}
-	console.log('alertInfo.loopIndex:  ' + alertInfo.loopIndex);
+	console.log('loopIndex:  ' + loopIndex);
 
 	checksFunction(alertInfo, sendAlertFunction, alertsConfig);
 
 	//this if check is for testing purposes so the function can be called without
 	//going into the infinite loop
 	if (!('numLoopIterations' in alertInfo) || alertInfo.loopIndex < alertInfo.numLoopIterations) {
-		alertInfo.loopIndex++;
+		loopIndex++;
 
 		setTimeout(function() {
-			exports.alertLoop(alertInfo, alertsConfig, sendAlertFunction, checksFunction, sleepTime);
+			exports.alertLoop(alertInfo, alertsConfig, sendAlertFunction, checksFunction, sleepTime, loopIndex);
 		},
 		sleepTime);
 	}
@@ -52,8 +48,10 @@ exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksF
 exports.buildInitialAlertInfo = function(db, callback) {
 	database.getDeviceMetadata(db, function(deviceMetadata) {
 		database.getAlertSettings(db, function(alertSettings) {
-			for (var id in deviceMetadata) {
-				var curDevice = deviceMetadata[id];
+			var alertInfo = deviceMetadata;
+
+			for (var id in alertInfo) {
+				var curDevice = alertInfo[id];
 				curDevice.lastTime = null;
 				curDevice.lastTemperature = null;
 
@@ -66,7 +64,7 @@ exports.buildInitialAlertInfo = function(db, callback) {
 				}
 			}
 
-			callback(deviceMetadata);
+			callback(alertInfo);
 		});
 	});
 };
@@ -150,7 +148,7 @@ exports.checkForNoCommunication = function(deviceAlertInfo, alertsConfig) {
 exports.checkForTemperatureAlert = function(deviceAlertInfo) {
 	console.log('alerts checkForTemperatureAlert');
 	console.log('deviceAlertInfo:  ' + JSON.stringify(deviceAlertInfo));
-	
+
 	var msg = '';
 	if ('alertSettings' in deviceAlertInfo) {
 		var alertSettings = deviceAlertInfo.alertSettings;

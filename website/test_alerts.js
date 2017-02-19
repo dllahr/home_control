@@ -14,7 +14,7 @@ const testDb =  new sqlite3.Database(testFileDbPath);
 
 testCases.testBuildInitialAlertInfo = function() {
 	console.log('test_alerts testBuildInitialAlertInfo');
-	
+
 	alerts.buildInitialAlertInfo(testDb, function(alertInfo) {
 		var N = Object.keys(alertInfo).length;
 		console.log('N:  ' + N);
@@ -212,11 +212,13 @@ testCases.testCheckForAlerts = function() {
 	var alertsConfig = {lastTimeOffset: 1000, enableEmail: true};
 
 	var now = (new Date()).getTime() / 1000;
-	var alertInfo = {myFakeDevice:{
-		id:'myFakeDevice',
-		lastTime:now,
-		lastTemperature:50,
-		alertSettings:[{comparison:'<', threshold:40.0}]}
+	var alertInfo = {
+		myFakeDevice: {
+			id:'myFakeDevice',
+			lastTime:now,
+			lastTemperature:50,
+			alertSettings:[{comparison:'<', threshold:40.0}]
+		}
 	};
 
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
@@ -262,7 +264,8 @@ testCases.testAlertLoop = function() {
 		console.log('function called');
 	};
 
-	alerts.alertLoop({numLoopIterations:3}, null, null, checksFunction, 100);
+	alerts.alertLoop({numLoopIterations:3}, null, null, checksFunction, 100, 0);
 };
+
 
 run_tests.run(process.argv, testCases);

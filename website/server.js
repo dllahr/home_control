@@ -24,7 +24,7 @@ measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfi
 	alerts.buildInitialAlertInfo(db, function(alertInfo) {
 		setTimeout(function() {
 			alerts.alertLoop(alertInfo, alertsConfig, alerts.sendAlert, alerts.checkForAlerts,
-				alertsConfig.sleepTime);
+				alertsConfig.sleepTime, 0);
 		}, alertsConfig.initialDelay);
 
 		http.createServer(function (request, response) {

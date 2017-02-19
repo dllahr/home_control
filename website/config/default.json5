@@ -6,8 +6,8 @@
 		gmailPassword:  'CHANGE ME',
 		emailAddresses:  'CHANGE ME',
 		lastTimeOffset:  1800,
-		sleepTime:  300000,
-		initialDelay:  600000
+		sleepTime:  10000,
+		initialDelay:  1
 	},
 
 	memoryBuffer:
