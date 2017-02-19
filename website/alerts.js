@@ -27,6 +27,8 @@ exports.alertLoop = function(alertInfo, alertsConfig, sendAlertFunction, checksF
 
 	checksFunction(alertInfo, sendAlertFunction, alertsConfig);
 
+	//this if check is for testing purposes so the function can be called without
+	//going into the infinite loop
 	if (!('numLoopIterations' in alertInfo) || alertInfo.loopIndex < alertInfo.numLoopIterations) {
 		alertInfo.loopIndex++;
 
@@ -183,7 +185,7 @@ exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 			message += JSON.stringify(alerts[0].deviceAlertInfo);
 		} else {
 			subject = 'multiple alerts detected';
-			
+
 			var message = '';
 			for (var i = 0; i < alerts.length; i++) {
 				var curAlert = alerts[i];
@@ -194,7 +196,8 @@ exports.checkForAlerts = function(alertInfo, sendAlertFunction, alertsConfig) {
 			}
 		}
 
-		sendAlertFunction(alertsConfig.gmailUsername, alertsConfig.gmailPassword, alertsConfig.emailAddresses, subject, message);
+		if (true == alertsConfig.enableEmail) {
+			sendAlertFunction(alertsConfig.gmailUsername, alertsConfig.gmailPassword, alertsConfig.emailAddresses, subject, message);
+		}
 	}
 };
-

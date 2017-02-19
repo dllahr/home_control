@@ -1,6 +1,7 @@
 {
 	alerts:
 	{
+		enableEmail:  false,
 		gmailUsername:  'CHANGE ME',
 		gmailPassword:  'CHANGE ME',
 		emailAddresses:  'CHANGE ME',
@@ -22,8 +23,8 @@
 
 	database:
 	{
-		databaseCodeDirectory:  '/home/lahr/code/home_control/database',
-		fileDbPath:  '/media/raid/dllahr/projects/temperatureMonitoring/measurements.sqlite3',
+		databaseCodeDirectory:  '../database',
+		fileDbPath:  'test_database.sqlite3',
 
 		recentQuery:
 		{
@@ -32,4 +33,3 @@
 		}
 	}
 }
-

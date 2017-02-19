@@ -114,7 +114,7 @@ testCases.testUpdateAlertInfo = function() {
 
 testCases.testSendAlert = function() {
 	var alertConfig = config.get('alerts');
-	alerts.sendAlert(alertConfig.gmailUsername, alertConfig.gmailPassword, alertConfig.emailAddresses, 
+	alerts.sendAlert(alertConfig.gmailUsername, alertConfig.gmailPassword, alertConfig.emailAddresses,
 		'test message from node - this is subject', 'test message from node - this is the body<br/><b>Hi bear hi!</b>');
 };
 
@@ -166,11 +166,11 @@ testCases.testCheckForAlerts = function() {
 		alertRecords.push([subject, message]);
 	};
 
-	var alertsConfig = {lastTimeOffset: 1000, minTemperature: 40};
-	
+	var alertsConfig = {lastTimeOffset: 1000, minTemperature: 40, enableEmail: true};
+
 	var now = (new Date()).getTime() / 1000;
 	var alertInfo = {myFakeDevice:{id:'myFakeDevice', lastTime:now, lastTemperature:50}};
-	
+
 	alerts.checkForAlerts(alertInfo, sendAlertsFunction, alertsConfig);
 	console.log('no message expected - alertRecords:  ' + JSON.stringify(alertRecords));
 	assert(alertRecords.length == 0);
@@ -213,4 +213,3 @@ testCases.testAlertLoop = function() {
 };
 
 run_tests.run(process.argv, testCases);
-
