@@ -2,80 +2,23 @@
 <html lang="en">
     <head>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="homeControl.js"></script>
 
         <!-- required by bootstrap -->
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
     </head>
     <body>
 	<div id="latestValuesDiv"></div>
-	<div id="setTemperatureDiv"></div>
-        <div id="myDiv" style="width: 1024px; height: 768px;"><!-- Plotly chart will be drawn inside this DIV --></div>
-    <script>
-	var latestValuesDiv = $("#latestValuesDiv");
-	latestValuesDiv.html("loading data (~5 s)");
-
-	$("body").css("cursor", "progress");
-
-	$.ajax({url:"../homeControl/", success: function(result) {
-		latestValuesDiv.html("data retrieved, formatting");
-
-		var deviceMetadata = result['deviceMetadata'];
-		console.log(deviceMetadata);
-
-		var deviceMap = {};
-		for (var i = 0; i < result['data'].length; i++) {
-			var r = result['data'][i];
-			var deviceId = r["device_id"];
-			
-			if (!(deviceId in deviceMap)) {
-				var curDeviceMetadata = deviceMetadata[deviceId];
-
-				var legendName = curDeviceMetadata['location'] + ' ' + curDeviceMetadata['device_type_name'];
-
-				deviceMap[deviceId] = {x:[], y:[], mode:"markers", type:"scatter", name:legendName};
-			}
-
-			var deviceData = deviceMap[deviceId];
-			var myDate = new Date(r["time"]*1000);
-			deviceData["x"].push(myDate);
-			deviceData["y"].push(r["value"]);
-		}
-
-		var deviceIds = Object.keys(deviceMap);
-		deviceIds.sort();
-
-		var tableHtml ='<table class="table table-striped table-hover">';
-		tableHtml += '<tr><th>Latest Temperature (F)</th><th>Location</th><th>Latest Time</th></tr>';
-		var data = [];
-		for (var i = 0; i < deviceIds.length; i++) {
-			var di = deviceIds[i];
-			var curData = deviceMap[di];
-			data.push(curData);
-
-			var lastIndex = curData.x.length - 1;
-			var latestTime = curData.x[lastIndex];
-			var latestTemperature = curData.y[lastIndex];
-			var rowHtml = '<tr>';
-			rowHtml += '<td>' + latestTemperature + '</td>';
-			rowHtml += '<td>' + curData.name + '</td>';
-			rowHtml += '<td>' + latestTime + '</td>';
-			rowHtml += '</tr>';
-			tableHtml += rowHtml;
-		}
-		tableHtml += '</table>';
-		latestValuesDiv.html(tableHtml);
-
-		$("body").css("cursor", "default");
-		Plotly.newPlot("myDiv", data);
-	}
-	});
-    </script>
+    <div id="myDiv" style="width: 1024px; height: 768px;">
+            <!-- Plotly chart will be drawn inside this DIV -->
+    </div>
+    <div id="setTemperaturesDiv"></div>
     </body>
+    <script>
+    </script>
 </html>
-
