@@ -9,10 +9,10 @@ const config = require('config');
 const fs = require('fs');
 
 
-const staticFilepaths = ['index.html', 'home_control.js', 'test_home_control.js',
+const staticFilenames = ['index.html', 'home_control.js', 'test_home_control.js',
 	'test_home_control.html'];
 
-const serverPort = config.get('server').port;
+const serverConfig = config.get('server');
 
 const dbConfig = config.get('database');
 
@@ -41,9 +41,10 @@ measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfi
 
 		//third, load static files
 		const staticFiles = {};
-		for (var i = 0; i < staticFilepaths.length; i++) {
-			const path = staticFilepaths[i];
-			staticFiles[path] = fs.readFileSync(path);
+		for (var i = 0; i < staticFilenames.length; i++) {
+			const fn = staticFilenames[i];
+			const path = serverConfig.staticFilesDirectory + '/' + fn;
+			staticFiles[fn] = fs.readFileSync(path);
 		}
 		staticFiles[''] = staticFiles['index.html'];
 
@@ -93,8 +94,8 @@ measurementBuffer.buildAndPopulateBuffer(dbConfig.databaseCodeDirectory, dbConfi
 				response.writeHead(405, {'Content-Type':'text/html'});
 				response.end('Sorry, we don\'t support that method:  ' + request.method);
 			}
-		}).listen(serverPort);
+		}).listen(serverConfig.port);
 
-		console.log('Server running at http://127.0.0.1:' + serverPort);
+		console.log('Server running at http://127.0.0.1:' + serverConfig.port);
 	});
 });

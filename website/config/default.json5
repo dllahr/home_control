@@ -17,7 +17,8 @@
 
 	server:
 	{
-		port: 8124
+		port: 8124,
+		staticFilesDirectory:  '.'
 	},
 
 	database:
