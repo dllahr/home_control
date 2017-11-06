@@ -8,3 +8,16 @@
         * called from browser that has downloaded website index.html
     * put requests:  save new data in the database
         * called from electric imp agents
+
+# Developing / Tests
+
+* trying it out
+    * run:  node server.js
+    * navigate to localhost:8124
+    * should see basic page with minimal data
+* server-side
+    * node test_database.js
+    * node test_database.js testGetDeviceMetadata
+* client side
+    * browse to localhost:8124/test_home_control.html
+        * view output in console

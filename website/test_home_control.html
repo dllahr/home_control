@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
         <script src="home_control.js"></script>
+        <script src="test_home_control.js"></script>
 
         <!-- required by bootstrap -->
         <meta charset="utf-8">
@@ -17,13 +17,13 @@
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/timepicker/jquery.timepicker.css" />
     </head>
     <body>
-	<div id="latestValuesDiv"></div>
+    <div id="latestValuesDiv"></div>
     <div id="myDiv" style="width: 1024px; height: 768px;">
             <!-- Plotly chart will be drawn inside this DIV -->
     </div>
     <div id="setTemperaturesDiv"></div>
     </body>
     <script>
-        $(document).ready($HomeControl.build);
+        $(document).ready($TestHomeControl.testAll);
     </script>
 </html>

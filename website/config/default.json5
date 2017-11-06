@@ -6,7 +6,7 @@
 		gmailPassword:  'CHANGE ME',
 		emailAddresses:  'CHANGE ME',
 		lastTimeOffset:  1800,
-		sleepTime:  10000,
+		sleepTime:  100000000,
 		initialDelay:  1
 	},
 
@@ -30,5 +30,26 @@
 			numEntries: 125000,
 			timeStep:  60
 		}
-	}
+	},
+
+	electricImp:
+	{
+		_common:
+		{
+			hostname:  'agent.electricimp.com',
+			userKey:  'CHANGE ME'
+		},
+
+		downstairs:
+		{
+			path:  '/CHANGE ME/control_settings',
+		},
+
+		'master bedroom':
+		{
+			path:  '/CHANGE ME/control_settings',
+		}
+	},
+
+	minimumTemperatureSetPoint: 42
 }
