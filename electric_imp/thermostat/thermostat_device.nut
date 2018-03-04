@@ -7,6 +7,7 @@ local timeSetpoints = [25*3600];
 //temperature setpoints in degrees Farenheit
 local temperatureSetpoints = [45];
 
+//request temperature settings from agent on startup
 agent.send("request_settings", null);
 
 //last time that a regulation check was made - a comparison between
