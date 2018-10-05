@@ -8,3 +8,13 @@
         * called from browser that has downloaded website index.html
     * put requests:  save new data in the database
         * called from electric imp agents
+
+# Dependencies
+
+* sudo apt-get install nginx nodejs npm
+* npm install sqlite3
+    * sqlite3@4.0.2
+    * had to download & compile on the raspberry pi (no default ARM package?)
+* npm install nodemailer
+* npm install config
+

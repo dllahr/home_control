@@ -43,6 +43,8 @@ exports.buildMemoryDbFromPath = function(dbScriptsDirectoryPath) {
 var insertStmtStr = 'insert into measurements (id, device_id, time, measurement_type_id, value, measurement_unit_id) values (?, ?, ?, ?, ?, ?)';
 
 exports.populateMeasurements = function(memDb, fileDbPath, numMeasurements, callback) {
+	console.log('measurement_buffer populateMeasurements fileDbPath:  ' + fileDbPath + '  numMeasurements:  ' + numMeasurements);
+
 	var db = new sqlite3.Database(fileDbPath);
 
 	console.log('measurement_buffer populateMeasurements starting query of fileDb');
