@@ -1,11 +1,11 @@
-local deviceType = "SSR";  //either SSR or MOSFET
+local deviceType = "MOSFET";  //either SSR or MOSFET
 
 //time setpoints in seconds - times when the temperature setpoint
 //changes
 local timeSetpoints = [25*3600];
 
 //temperature setpoints in degrees Farenheit
-local temperatureSetpoints = [45];
+local temperatureSetpoints = [42];
 
 //request temperature settings from agent on startup
 agent.send("request_settings", null);
@@ -240,3 +240,4 @@ function masterLoop() {
 }
 
 masterLoop();
+

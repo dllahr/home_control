@@ -4,7 +4,7 @@
 server.log("Agent started");
 server.log("Agent url:  " + http.agenturl());
 
-local controlSettings = {"times":[25*3600], "temperatures":[45]};
+local controlSettings = {"times":[25*3600], "temperatures":[42]};
 
 function validateBody(body) {
     if ("times" in body && "temperatures" in body) {
@@ -38,7 +38,12 @@ function httpHandler(req, resp) {
     server.log("req.headers:  " + headersJson);
     server.log("req.body:  " + req.body);
 
-    if ("user-key" in req.headers) {
+    if ("OPTIONS" == req.method) {
+        resp.header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS");
+        resp.header("Access-Control-Allow-Headers", "origin, x-csrftoken, content-type, accept, user-key");
+        resp.header("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
+        resp.send(200,"OK");
+    } else if ("user-key" in req.headers) {
         local userKey = req.headers["user-key"]
         server.log("user-key found in req.headers:  " + userKey);
 
@@ -49,6 +54,7 @@ function httpHandler(req, resp) {
                 if ("GET" == req.method) {
                     server.log("valid get request received, sending controlSettings");
                     resp.header("Content-Type", "application/json");
+                    resp.header("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
                     resp.send(200, http.jsonencode(controlSettings));
                 } else if ("PUT" == req.method) {
                     try {
