@@ -24,9 +24,9 @@ function validateBody(body) {
 }
 
 function httpHandler(req, resp) {
-    local expectedUserKey = "CHANGE ME";
-    local responseFailMessage = "epic failz";
-    local apiControlPath = "/control_settings";
+    const expectedUserKey = "CHANGE ME";
+    const responseFailMessage = "epic failz";
+    const apiControlPath = "/control_settings";
 
     server.log("****************************************");
     server.log("httpHandler called");
@@ -44,7 +44,7 @@ function httpHandler(req, resp) {
         resp.header("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
         resp.send(200,"OK");
     } else if ("user-key" in req.headers) {
-        local userKey = req.headers["user-key"]
+        const userKey = req.headers["user-key"]
         server.log("user-key found in req.headers:  " + userKey);
 
         if (expectedUserKey == userKey) {
@@ -107,7 +107,7 @@ function calcStats(data) {
         sumSq += data[i] * data[i];
     }
 
-    local ave = sum / data.len();
+    const ave = sum / data.len();
 
     local result = {
         ave = ave,
@@ -155,7 +155,7 @@ device.on("sensor_data", function(sensor_data) {
     local headers = { "Content-Type" : "application/json" };
     // local body = http.urlencode(payload);
     local body = http.jsonencode(sensor_data);
-    local url = "http://herman.chickenkiller.com:8080/homeControl/";
+    const url = "http://herman.chickenkiller.com:8080/homeControl/";
 
     local request = http.post(url, headers, body);
     server.log("data received from device, sent to server");
